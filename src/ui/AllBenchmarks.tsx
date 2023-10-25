@@ -6,6 +6,7 @@ import { webgpu_compute_msm, webgpu_pippenger_msm } from '../reference/reference
 import CSVExportButton from './CSVExportButton';
 import { TestCaseDropDown } from './TestCaseDropDown';
 import { PowersTestCase, TestCase, loadTestCase } from '../test-data/testCases';
+import { penumbra_wasm } from '../penumbra/transaction';
 
 export const AllBenchmarks: React.FC = () => {
   const initialDefaultInputSize = 1_000;
@@ -127,6 +128,15 @@ export const AllBenchmarks: React.FC = () => {
         scalars={bigIntScalars}
         expectedResult={expectedResult}
         msmFunc={webgpu_compute_msm}
+        postResult={postResult}
+      />
+      <Benchmark
+        name={'Penumbra Wasm: Single Thread'}
+        disabled={disabledBenchmark}
+        baseAffinePoints={baseAffineBigIntPoints}
+        scalars={bigIntScalars}
+        expectedResult={expectedResult}
+        msmFunc={penumbra_wasm}
         postResult={postResult}
       />
     </div>
