@@ -3,7 +3,6 @@ import { Benchmark } from './Benchmark';
 import { bigIntToU32Array, generateRandomFields } from '../reference/webgpu/utils';
 import { BigIntPoint, U32ArrayPoint } from '../reference/types';
 import { webgpu_compute_msm, webgpu_pippenger_msm } from '../reference/reference';
-import CSVExportButton from './CSVExportButton';
 import { TestCaseDropDown } from './TestCaseDropDown';
 import { PowersTestCase, TestCase, loadTestCase } from '../test-data/testCases';
 import { penumbra_wasm } from '../penumbra/transaction';
@@ -18,7 +17,6 @@ export const AllBenchmarks: React.FC = () => {
   const [u32Points, setU32Points] = useState<U32ArrayPoint[]>([]);
   const [u32Scalars, setU32Scalars] = useState<Uint32Array[]>([]);
   const [expectedResult, setExpectedResult] = useState<{x: bigint, y: bigint} | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [benchmarkResults, setBenchmarkResults] = useState<any[][]>([["InputSize", "MSM Func", "Time (MS)"]]);
   const [comparisonResults, setComparisonResults] = useState<{ x: bigint, y: bigint, timeMS: number, msmFunc: string, inputSize: number }[]>([]);
   const [disabledBenchmark, setDisabledBenchmark] = useState<boolean>(false);
@@ -97,7 +95,7 @@ export const AllBenchmarks: React.FC = () => {
   
   return (
     <div>
-      <div className="flex items-center space-x-4 px-5">
+      {/* <div className="flex items-center space-x-4 px-5">
         <div className="text-gray-800">Input Size:</div>
         <input
           type="text"
@@ -107,10 +105,9 @@ export const AllBenchmarks: React.FC = () => {
           onChange={(e) => setInputSize(parseInt(e.target.value))}
         />
         <TestCaseDropDown useRandomInputs={useRandomInputs} loadAndSetData={loadAndSetData}/>
-        <CSVExportButton data={benchmarkResults} filename={'msm-benchmark'} />
-      </div>
+      </div> */}
       
-      <Benchmark
+      {/* <Benchmark
         name={'Pippenger WebGPU MSM'}
         disabled={disabledBenchmark}
         baseAffinePoints={baseAffineBigIntPoints}
@@ -118,8 +115,8 @@ export const AllBenchmarks: React.FC = () => {
         expectedResult={expectedResult}
         msmFunc={webgpu_pippenger_msm}
         postResult={postResult}
-      />
-      <Benchmark
+      /> */}
+      {/* <Benchmark
         name={'Naive WebGPU MSM'}
         disabled={disabledBenchmark}
         // baseAffinePoints={u32Points}
@@ -129,7 +126,7 @@ export const AllBenchmarks: React.FC = () => {
         expectedResult={expectedResult}
         msmFunc={webgpu_compute_msm}
         postResult={postResult}
-      />
+      /> */}
       <Benchmark
         name={'Penumbra Wasm: Single Thread'}
         disabled={disabledBenchmark}
