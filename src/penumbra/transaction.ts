@@ -1,22 +1,21 @@
 import { loadWasmModule } from "./wasm-loader";
-import { TransactionPlannerRequest, TransactionPlannerResponse } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/view/v1alpha1/view_pb';
+import { TransactionPlannerRequest } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/view/v1alpha1/view_pb';
 import { IndexedDb } from './database';
 import { base64ToUint8Array } from './utils'
 import { authorization } from "./authorize";
 import { witness_and_build } from './build'
 import { transaction_plan } from "./tx-plan";
 
-export const penumbra_wasm = async (): Promise<any> => {    
-  // Load WASM module from Penumbra WASM crate 
-  const penumbra_wasm_module = await loadWasmModule();
+// Globally load WASM module from Penumbra WASM crate 
+export const wasm_module = await loadWasmModule();
 
-  const generateInitialProps = () => ({
+export const penumbra_wasm = async (): Promise<any> => {    
+    // Initialize database
+    const indexedDb = await IndexedDb.initialize({
       chainId: 'penumbra-testnet-iapetus',
       dbVersion: 15,
       walletId: 'wallet_12345',
-  });
-
-  const indexedDb = await IndexedDb.initialize(generateInitialProps())
+    })
 
     // Query for a transaction plan
     const req = new TransactionPlannerRequest({
@@ -34,19 +33,21 @@ export const penumbra_wasm = async (): Promise<any> => {
     // Start timer
     const startTime = performance.now(); // Record start time
 
-    // Call handleTxPlannerReq()
+    // Transaction plan
     const transactionPlan = await transaction_plan(indexedDb, req)
 
     // Authorize
     const auth = await authorization(transactionPlan)
-    console.log("authorize is: ", auth)
+    console.log("Authorization: ", auth)
 
     // Witness and Build
-    const res = await witness_and_build(indexedDb, auth, transactionPlan)
-    console.log("build is: ", res)
+    const build = await witness_and_build(indexedDb, auth, transactionPlan)
+    console.log("ZK Proof: ", build)
 
-    const endTime = performance.now(); // Record end time
-    const executionTime = endTime - startTime; // Calculate execution time
+    // End timer
+    const endTime = performance.now();
+    const executionTime = endTime - startTime; 
     console.log(`sendTx execution time: ${executionTime} milliseconds`);
 
+    return executionTime
 };

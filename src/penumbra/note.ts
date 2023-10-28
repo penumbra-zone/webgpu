@@ -1,6 +1,6 @@
 import { SpendableNoteRecord } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/view/v1alpha1/view_pb';
 
-// Sample note
+// Sample UTXO note
 export const spendable_note = SpendableNoteRecord.fromJson({
     noteCommitment: {
         inner: "MY7PmcrH4fhjFOoMIKEdF+x9EUhZ9CS/CIfVco7Y5wU="

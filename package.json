@@ -26,12 +26,14 @@
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
     "html-webpack-plugin": "^5.5.0",
+    "idb": "^7.1.1",
     "path-browserify": "^1.0.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "save-dev": "0.0.1-security",
     "stream-browserify": "^3.0.0",
-    "threads": "^1.7.0"
+    "threads": "^1.7.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",

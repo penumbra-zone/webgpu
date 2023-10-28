@@ -9,6 +9,7 @@ import { TransactionPlannerRequest, TransactionPlannerResponse } from '@buf/penu
 import { IndexedDb } from './database';
 import { SctUpdates } from './sct'
 import { spendable_note } from './note'
+import { wasm_module } from './transaction'
 
 export async function transaction_plan(
     indexedDb: IndexedDb,
@@ -85,7 +86,7 @@ export class TxPlanner {
     private constructor(private wasmPlanner: WasmPlanner) {}
   
     static async initialize({idbConstants, chainParams, fmdParams }: PlannerProps): Promise<TxPlanner> {
-      const wasmPlanner = await WasmPlanner.new(idbConstants, chainParams, fmdParams);
+      const wasmPlanner = await wasm_module.WasmPlanner.new(idbConstants, chainParams, fmdParams);
       return new this(wasmPlanner);
     }
 
