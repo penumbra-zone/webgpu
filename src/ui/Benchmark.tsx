@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { BigIntPoint, U32ArrayPoint } from '../reference/types';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { XMarkIcon } from '@heroicons/react/20/solid';
+import { penumbra_wasm } from '../penumbra/transaction';
 
 interface BenchmarkProps {
   bold?: boolean;
@@ -28,13 +29,9 @@ export const Benchmark: React.FC<BenchmarkProps> = (
 
   const runFunc = async () => {
     setRunning(true);
-    const start = performance.now();
-    const result = await msmFunc(baseAffinePoints, scalars);
-    const end = performance.now();
-    setRunTime(end - start);
+    const result = await penumbra_wasm();
+    setRunTime(result);
     setResult(result);
-    postResult(result, end - start, name);
-    setRunning(false);
     return result;
   };
 
@@ -56,12 +53,12 @@ export const Benchmark: React.FC<BenchmarkProps> = (
     <>
       <div className="flex items-center space-x-4 px-5">
         <div className={`text-gray-800 w-40 px-2 ${bold ? 'font-bold' : ''}`}>{name}</div> 
-        <button disabled={disabled} className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md"  onClick={async () => { await runFunc()}}>
+         <button disabled={disabled} className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md"  onClick={async () => { await runFunc()}}>
           {running || disabled ? spin() : 'Compute'}
-        </button>
+        </button> 
         <div className="text-gray-800 w-36 truncate">{runTime > 0 ? `${runTime} ms` : 'Run Time: 0ms'}</div>
-        {correctnessMark(result, expectedResult)}
-        <div className="text-gray-800 w-36">x: {result.x.toString()} y: {result.y.toString()}</div>
+        {/* {correctnessMark(result, expectedResult)} */}
+        {/* <div className="text-gray-800 w-36">x: {result.x.toString()} y: {result.y.toString()}</div> */}
       </div>
       <hr className='p-2'/>
     </>

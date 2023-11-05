@@ -6,7 +6,7 @@ import { AllBenchmarks } from "./ui/AllBenchmarks";
 
 const App = () => (
   <>
-    <h1 className="font-bold">MSM Benchmarks {new Date().toLocaleDateString()}</h1>
+    <h1 className="font-bold">Penumbra Benchmarks {new Date().toLocaleDateString()}</h1>
     <AllBenchmarks />
   </>
 );
