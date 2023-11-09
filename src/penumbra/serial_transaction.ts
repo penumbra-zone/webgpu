@@ -3,7 +3,7 @@ import { TransactionPlannerRequest } from '@buf/penumbra-zone_penumbra.bufbuild_
 import { IndexedDb } from './database';
 import { base64ToUint8Array } from './utils'
 import { authorization } from "./authorize";
-import { witness_and_build } from './build'
+import { witness_and_build } from './build_serial'
 import { transaction_plan } from "./tx-plan";
 
 // Globally load WASM module from Penumbra WASM crate 
