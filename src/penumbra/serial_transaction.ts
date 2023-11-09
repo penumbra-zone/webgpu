@@ -43,6 +43,7 @@ export const penumbra_wasm = async (): Promise<any> => {
     // Witness and Build
     const build = await witness_and_build(indexedDb, auth, transactionPlan)
     console.log("ZK Proof: ", build)
+    
 
     // End timer
     const endTime = performance.now();
