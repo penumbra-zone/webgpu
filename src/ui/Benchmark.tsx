@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { BigIntPoint, U32ArrayPoint } from '../reference/types';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { XMarkIcon } from '@heroicons/react/20/solid';
-import { penumbra_wasm } from '../penumbra/transaction';
+// import { penumbra_wasm } from '../penumbra/transaction';
+import { penumbra_wasm_parallel } from '../penumbra/parallel_transaction';
 
 interface BenchmarkProps {
   bold?: boolean;
@@ -29,7 +30,7 @@ export const Benchmark: React.FC<BenchmarkProps> = (
 
   const runFunc = async () => {
     setRunning(true);
-    const result = await penumbra_wasm();
+    const result = await penumbra_wasm_parallel();
     setRunTime(result);
     setResult(result);
     return result;

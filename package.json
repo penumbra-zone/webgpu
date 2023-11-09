@@ -33,7 +33,8 @@
     "save-dev": "0.0.1-security",
     "stream-browserify": "^3.0.0",
     "threads": "^1.7.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "wasm-loader": "^1.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
