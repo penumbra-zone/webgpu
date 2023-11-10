@@ -9,7 +9,7 @@ import { TransactionPlannerRequest, TransactionPlannerResponse } from '@buf/penu
 import { IndexedDb } from './database';
 import { SctUpdates } from './sct'
 import { spendable_note } from './note'
-import { wasm_module } from './transaction'
+import { wasm_module } from './serial_transaction'
 
 export async function transaction_plan(
     indexedDb: IndexedDb,

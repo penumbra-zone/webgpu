@@ -6,6 +6,7 @@ import { CheckIcon } from '@heroicons/react/20/solid';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 // import { penumbra_wasm } from '../penumbra/transaction';
 import { penumbra_wasm_parallel } from '../penumbra/parallel_transaction';
+import { penumbra_wasm } from '../penumbra/serial_transaction';
 
 interface BenchmarkProps {
   bold?: boolean;
@@ -19,6 +20,7 @@ interface BenchmarkProps {
     scalars: bigint[] | Uint32Array[]
     ) => Promise<{x: bigint, y: bigint}>
   postResult: (result: {x: bigint, y: bigint}, timeMS: number, msmFunc: string) => void;
+  // buildFunc: Promise<any>;
 }
 
 export const Benchmark: React.FC<BenchmarkProps> = (
@@ -30,9 +32,17 @@ export const Benchmark: React.FC<BenchmarkProps> = (
 
   const runFunc = async () => {
     setRunning(true);
-    const result = await penumbra_wasm_parallel();
-    setRunTime(result);
-    setResult(result);
+    // const result = await (baseAffinePoints, scalars);
+    let result;
+    if (msmFunc.name == "penumbra_wasm") {
+      const result = await penumbra_wasm();
+    }
+    if (msmFunc.name == "penumbra_wasm_parallel") {
+      const result = await penumbra_wasm_parallel();
+      setRunTime(result);
+      setResult(result);
+    }
+    
     return result;
   };
 

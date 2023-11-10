@@ -3,7 +3,7 @@ import { TransactionPlannerRequest } from '@buf/penumbra-zone_penumbra.bufbuild_
 import { IndexedDb } from './database';
 import { base64ToUint8Array } from './utils'
 import { authorization } from "./authorize";
-import { witness_and_build } from './build_serial'
+import { witness_and_build } from './build'
 import { transaction_plan } from "./tx-plan";
 
 // Globally load WASM module from Penumbra WASM crate 
@@ -35,6 +35,7 @@ export const penumbra_wasm = async (): Promise<any> => {
 
     // Transaction plan
     const transactionPlan = await transaction_plan(indexedDb, req)
+    console.log("Transaction Plan: ", transactionPlan)
 
     // Authorize
     const auth = await authorization(transactionPlan)
@@ -44,7 +45,6 @@ export const penumbra_wasm = async (): Promise<any> => {
     const build = await witness_and_build(indexedDb, auth, transactionPlan)
     console.log("ZK Proof: ", build)
     
-
     // End timer
     const endTime = performance.now();
     const executionTime = endTime - startTime; 

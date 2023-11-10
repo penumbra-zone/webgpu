@@ -2,7 +2,7 @@ import { IndexedDb } from './database';
 import { AuthorizeResponse } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/custody/v1alpha1/custody_pb';
 import { TransactionPlannerResponse } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/view/v1alpha1/view_pb';
 import { WitnessAndBuildResponse } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/view/v1alpha1/view_pb';
-import { wasm_module } from './transaction'
+import { wasm_module } from './serial_transaction'
 
 export const witness_and_build = async (
     indexedDb: IndexedDb,
