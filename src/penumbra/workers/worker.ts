@@ -1,16 +1,19 @@
-import { ActionPlan, MemoData, MemoPlan, WitnessData } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/transaction/v1alpha1/transaction_pb';
+import { ActionPlan, TransactionPlan, WitnessData } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/transaction/v1alpha1/transaction_pb';
 import { spawn, Thread, Worker } from 'threads';
-import { WasmBuilder } from "../pkg/penumbra_wasm";
 
 export const webWorkers = async (
+  transaction_plan: TransactionPlan,
   action_plan: ActionPlan,
   full_viewing_key: string,
   witness_data: WitnessData,
-  memo_key: MemoPlan,
 ) => {
-  // Spawn web workers
+  // Spawn web worker
   const worker = await spawn(new Worker('./webworkers.js'));
-  const result = await worker(action_plan?.toJson(), full_viewing_key, witness_data, memo_key);  
+
+  // Execute web worker
+  const result = await worker(transaction_plan?.toJson(), action_plan?.toJson(), full_viewing_key, witness_data);  
+
+  // Terminate web worker
   await Thread.terminate(worker);
   return result;
 }

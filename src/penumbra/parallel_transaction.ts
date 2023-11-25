@@ -1,19 +1,12 @@
-import { loadWasmModule } from "./wasm-loader";
 import { TransactionPlannerRequest } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/view/v1alpha1/view_pb';
 import { IndexedDb } from './database';
 import { base64ToUint8Array } from './utils'
 import { authorization } from "./authorize";
 import { transaction_plan } from "./tx-plan";
 import { webWorkers } from "./workers/worker";
-import { WasmBuilder } from "./pkg/penumbra_wasm_bg";
-import { SpendPlan } from "@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/component/shielded_pool/v1alpha1/shielded_pool_pb";
-import { ActionPlan, MemoPlan } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/transaction/v1alpha1/transaction_pb';
-
-// Globally load WASM module from Penumbra WASM crate 
-export const wasm_module = await loadWasmModule();
+import { witness, build_parallel } from '@penumbra-zone-test/wasm-bundler';
 
 export const penumbra_wasm_parallel = async (): Promise<any> => {    
-    console.log("entered penumbra_wasm_parallel")
     // Initialize database
     const indexedDb = await IndexedDb.initialize({
       chainId: 'penumbra-testnet-iapetus',
@@ -25,7 +18,7 @@ export const penumbra_wasm_parallel = async (): Promise<any> => {
     const req = new TransactionPlannerRequest({
       outputs: [
         {
-          address: { altBech32m: "penumbrav2t1ztjrnr9974u4308zxy3sc378sh0k2r8mh0xqt9525c78l9vlyxf2w7c087tlzp4pnk9a7ztvlrnp9lf7hqx3wsm9su4e7vchtav0ap3lpnedry5hfn22hnu9vvaxjpv0t8phvp" },
+          address: { altBech32m: "penumbra1dugkjttfezh4gfkqs77377gnjlvmkkehusx6953udxeescc0qpgk6gqc0jmrsjq8xphzrg938843p0e63z09vt8lzzmef0q330e5njuwh4290n8pemcmx70sasym0lcjkstgzc" },
           value: {
             amount: { lo: 1n, hi: 0n },
             assetId: { inner: base64ToUint8Array("nwPDkQq3OvLnBwGTD+nmv1Ifb2GEmFCgNHrU++9BsRE=") },
@@ -34,39 +27,39 @@ export const penumbra_wasm_parallel = async (): Promise<any> => {
       ],
     });
 
-    // Start timer
-    const startTime = performance.now(); // Record start time
-
     // Transaction plan
     const transactionPlan = await transaction_plan(indexedDb, req)
+    console.log("Transaction plan is: ", transactionPlan)
 
     // Authorize
     const authorizationData = await authorization(transactionPlan)
-    console.log("Authorization data: ", authorizationData)
+    console.log("Authorization is: ", authorizationData)
 
     // Retrieve SCT 
     const sct = await indexedDb.getStateCommitmentTree()
 
     // Generate witness data from SCT and specific transaction plan
-    const witnessData = wasm_module.witness(transactionPlan.plan?.toJson(), sct)
-    console.log("Witness: ", witnessData)
+    const witnessData = witness(transactionPlan.plan?.toJson(), sct)
+    console.log("Witness is: ", witnessData)
 
     // Viewing key to reveal asset balances and transactions
     const fullViewingKey = "penumbrafullviewingkey1mnm04x7yx5tyznswlp0sxs8nsxtgxr9p98dp0msuek8fzxuknuzawjpct8zdevcvm3tsph0wvsuw33x2q42e7sf29q904hwerma8xzgrxsgq2"
 
     // Check if related fields are non-null
     const action_plan = transactionPlan.plan?.actions;
-    const memo = transactionPlan.plan?.memoPlan
+
+    // Start timer
+    const startTime = performance.now(); // Record start time
 
     // Execute round of concurrent webworkers to build actions
     const workerPromises = [];
-    if (action_plan && memo) {
+    if (action_plan && transactionPlan.plan) {
         for (let i = 0; i < action_plan.length; i++) {
             const workerPromise = webWorkers(
-                action_plan[i],
-                fullViewingKey,
-                witnessData,
-                memo
+              transactionPlan.plan,
+              action_plan[i],
+              fullViewingKey,
+              witnessData,
             );
 
             workerPromises.push(workerPromise)
@@ -77,20 +70,17 @@ export const penumbra_wasm_parallel = async (): Promise<any> => {
     const batchActions = await Promise.all(workerPromises);
 
     // Execute parallel build method
-    const tx = WasmBuilder.build_parallel(
+    const tx = build_parallel(
         batchActions, 
-        fullViewingKey, 
         transactionPlan.plan?.toJson(), 
         witnessData, 
         authorizationData
     )
     
-    console.log("tx is: ", tx)
+    console.log("TX is: ", tx)
 
     // End timer
     const endTime = performance.now()
     const executionTime = endTime - startTime;
-    console.log(`sendTx execution time: ${executionTime} milliseconds`)
-
-    return executionTime
+    console.log(`Parallel transaction execution time: ${executionTime} milliseconds`);
 };

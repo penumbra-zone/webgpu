@@ -1,21 +1,19 @@
-import { WasmPlanner } from '@penumbra-zone/wasm-bundler';
 import { IdbConstants } from './database'
 import { ChainParameters, FmdParameters } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/component/chain/v1alpha1/chain_pb';
-import { Address } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/keys/v1alpha1/keys_pb';
+import { Address, AddressIndex } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/keys/v1alpha1/keys_pb';
 import { Value } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/asset/v1alpha1/asset_pb';
-import { TransactionPlan } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/transaction/v1alpha1/transaction_pb';
-import { JsonValue } from '@bufbuild/protobuf';
+import { MemoPlaintext, TransactionPlan } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/core/transaction/v1alpha1/transaction_pb';
+import { JsonValue} from '@bufbuild/protobuf';
 import { TransactionPlannerRequest, TransactionPlannerResponse } from '@buf/penumbra-zone_penumbra.bufbuild_es/penumbra/view/v1alpha1/view_pb';
 import { IndexedDb } from './database';
 import { SctUpdates } from './sct'
 import { spendable_note } from './note'
-import { wasm_module } from './serial_transaction'
+import { WasmPlanner } from '@penumbra-zone-test/wasm-bundler';
 
 export async function transaction_plan(
     indexedDb: IndexedDb,
     req: TransactionPlannerRequest,
   ): Promise<TransactionPlannerResponse> {
-  
     // Define sct updates
     const sctUpdates: SctUpdates = {
       store_commitments: {
@@ -61,18 +59,29 @@ export async function transaction_plan(
       chainParams,
       fmdParams,
     });
-  
+
     for (const o of req.outputs) {
       if (!o.value || !o.address) continue;
       planner.output(o.value, o.address);
     }
-  
-    const json_address = "ts1I61pd5+xWqlwcuPwsPOGbjevxAoQVymTXyHe60jLlY57WHcAuGsSwYuSxnOX+nTgEBm3MHn7mBlNTxqEkbnJwlNu6YUSDmA8D+aOqCT4="
-    const refundAddrJson = {
-      inner: json_address
+
+    // Construct memo data
+    const address_for_memo = {
+      altBech32m: "penumbra1dugkjttfezh4gfkqs77377gnjlvmkkehusx6953udxeescc0qpgk6gqc0jmrsjq8xphzrg938843p0e63z09vt8lzzmef0q330e5njuwh4290n8pemcmx70sasym0lcjkstgzc".toString(),
     }
-    
-    const plan = await planner.plan(refundAddrJson);
+    const memo = new MemoPlaintext({
+      returnAddress: address_for_memo,
+      text: "sample-memo",
+    })
+    const memo_result = await planner.memo(memo);
+
+    // Construct transaction plan
+    const addressIndex: AddressIndex | null = null;
+    const refundAddrJson = {
+      inner: "ts1I61pd5+xWqlwcuPwsPOGbjevxAoQVymTXyHe60jLlY57WHcAuGsSwYuSxnOX+nTgEBm3MHn7mBlNTxqEkbnJwlNu6YUSDmA8D+aOqCT4=".toString()
+    }
+    const plan = await planner.plan(refundAddrJson, addressIndex);
+
     return new TransactionPlannerResponse({ plan });
   }
 
@@ -83,10 +92,10 @@ export async function transaction_plan(
 }
 
 export class TxPlanner {
-    private constructor(private wasmPlanner: WasmPlanner) {}
+    public constructor(public wasmPlanner: any) {}
   
     static async initialize({idbConstants, chainParams, fmdParams }: PlannerProps): Promise<TxPlanner> {
-      const wasmPlanner = await wasm_module.WasmPlanner.new(idbConstants, chainParams, fmdParams);
+      const wasmPlanner = await WasmPlanner.new(idbConstants, chainParams, fmdParams);
       return new this(wasmPlanner);
     }
 
@@ -94,8 +103,13 @@ export class TxPlanner {
         this.wasmPlanner.output(value.toJson(), addr.toJson());
     }
 
-    async plan(refundAddr: any): Promise<TransactionPlan> {
-        const json = (await this.wasmPlanner.plan(refundAddr)) as JsonValue;
+    async memo(message: MemoPlaintext): Promise<void> {
+      this.wasmPlanner.memo(message.toJson())
+    }
+
+    async plan(refundAddr: any, sourceAddr: any): Promise<TransactionPlan> {
+        const json = (await this.wasmPlanner.plan(refundAddr, sourceAddr)) as JsonValue;
+
         return TransactionPlan.fromJson(json);
     }
 }
