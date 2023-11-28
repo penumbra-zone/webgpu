@@ -25,10 +25,6 @@ export async function execute_worker(
             const delegatorKey = await fetchBinaryFile('delegator_vote_pk.bin');
             load_proving_key(delegatorKey, "delegator_vote");
             break;
-        case "nullifier":
-            const nullifierKey = await fetchBinaryFile('nullifier_derivation_pk.bin');
-            load_proving_key(nullifierKey, "nullifier_derivation");
-            break;
         case "swap":
             const swapKey = await fetchBinaryFile('swap_pk.bin');
             load_proving_key(swapKey, "swap");
