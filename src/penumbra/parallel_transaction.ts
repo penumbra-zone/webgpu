@@ -60,6 +60,7 @@ export const penumbra_wasm_parallel = async (): Promise<any> => {
               action_plan[i],
               fullViewingKey,
               witnessData,
+              action_plan[i].action.case!
             );
 
             workerPromises.push(workerPromise)

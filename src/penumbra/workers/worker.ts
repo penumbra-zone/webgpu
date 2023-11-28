@@ -6,12 +6,13 @@ export const webWorkers = async (
   action_plan: ActionPlan,
   full_viewing_key: string,
   witness_data: WitnessData,
+  key_type: string,
 ) => {
   // Spawn web worker
   const worker = await spawn(new Worker('./webworkers.js'));
 
   // Execute web worker
-  const result = await worker(transaction_plan?.toJson(), action_plan?.toJson(), full_viewing_key, witness_data);  
+  const result = await worker(transaction_plan?.toJson(), action_plan?.toJson(), full_viewing_key, witness_data, key_type);  
 
   // Terminate web worker
   await Thread.terminate(worker);
