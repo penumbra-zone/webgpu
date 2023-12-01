@@ -5,7 +5,8 @@ import { BigIntPoint, U32ArrayPoint } from '../reference/types';
 import { webgpu_compute_msm, webgpu_pippenger_msm } from '../reference/reference';
 import { TestCaseDropDown } from './TestCaseDropDown';
 import { PowersTestCase, TestCase, loadTestCase } from '../test-data/testCases';
-import { penumbra_wasm } from '../penumbra/transaction';
+import { penumbra_wasm } from '../penumbra/serial_transaction';
+import { penumbra_wasm_parallel } from '../penumbra/parallel_transaction';
 
 export const AllBenchmarks: React.FC = () => {
   const initialDefaultInputSize = 1_000;
@@ -134,6 +135,15 @@ export const AllBenchmarks: React.FC = () => {
         scalars={bigIntScalars}
         expectedResult={expectedResult}
         msmFunc={penumbra_wasm}
+        postResult={postResult}
+      />
+      <Benchmark
+        name={'Penumbra Wasm: Web-Workers'}
+        disabled={disabledBenchmark}
+        baseAffinePoints={baseAffineBigIntPoints}
+        scalars={bigIntScalars}
+        expectedResult={expectedResult}
+        msmFunc={penumbra_wasm_parallel}
         postResult={postResult}
       />
     </div>

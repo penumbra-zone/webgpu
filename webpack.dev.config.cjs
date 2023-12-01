@@ -13,7 +13,9 @@ const config = {
   },
   entry: "./src/index.tsx",
   experiments: {
-    asyncWebAssembly: true
+    asyncWebAssembly: true,
+    lazyCompilation: true,
+    syncWebAssembly: true,
   },
   module: {
     rules: [
@@ -44,7 +46,12 @@ const config = {
       "crypto": require.resolve("crypto-browserify"),
       "stream": require.resolve("stream-browserify"),
       "buffer": require.resolve("buffer/"),
-      "path": require.resolve("path-browserify")
+      "path": require.resolve("path-browserify"),
+      // fs: false,
+      // path: false,
+      // alias: {
+      //   '@penumbra-zone-test': path.resolve(__dirname, 'node_modules/@penumbra-zone-test'),
+      // },
     }
   },
   plugins: [
@@ -73,91 +80,95 @@ const config = {
       "Cross-Origin-Embedder-Policy": "require-corp",
       "Cross-Origin-Opener-Policy": "same-origin",
     },
-    static: path.join(__dirname, "build"),
     historyApiFallback: true,
     port: 4040,
     open: true,
     hot: true,
     client: {
       overlay: false
-    }
+    },
   },
 };
 
-// const workerConfig = {
-//   mode: "development",
-//   devtool: "inline-source-map",
-//   cache: {
-//     type: 'filesystem',
-//     allowCollectingMemory: true
-//   },
-//   performance: {
-//     hints: false
-//   },
-//   experiments: {
-//     asyncWebAssembly: true,
-//     syncWebAssembly: true,
-//     topLevelAwait: true
-//   },
-//   target: 'webworker',
-//   entry: {
-//     wasmMSM: './src/workers/wasmMSM.ts',
-//   },
-//   output: {
-//     pathinfo: false,
-//     publicPath: '/',
-//   },
-//   resolve: {
-//     extensions: ['.ts', '.tsx', '.js', '.wasm'],
-//     alias: {
-//       shared: path.resolve(__dirname, 'src', 'shared')
-//     },
-//     fallback: {
-//       url: false,
-//       os: false,
-//       path: false,
-//       stream: false,
-//       crypto: require.resolve("crypto-browserify"),
-//       http: false,
-//       https: false,
-//       buffer: require.resolve('buffer'),
-//       stream: require.resolve('stream-browserify'),
-//       assert: require.resolve('assert')
-//     }
-//   },
-//   plugins: [
-//     new webpack.ProvidePlugin({
-//       Buffer: ['buffer', 'Buffer']
-//     }),
+const workerConfig = {
+  mode: "development",
+  devtool: "inline-source-map",
+  cache: {
+    type: 'filesystem',
+    allowCollectingMemory: true
+  },
+  performance: {
+    hints: false
+  },
+  experiments: {
+    asyncWebAssembly: true,
+    syncWebAssembly: true,
+    topLevelAwait: true
+  },
+  target: 'web',
+  externals:{
+    fs:    "commonjs fs",
+    path:  "commonjs path"
+  },
+  entry: {
+    webworkers: './src/penumbra/workers/action.ts'
+  },
+  output: {
+    pathinfo: false,
+    publicPath: '/',
+  },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.wasm'],
+    alias: {
+      shared: path.resolve(__dirname, 'src', 'shared')
+    },
+    fallback: {
+      url: false,
+      os: false,
+      stream: false,
+      crypto: require.resolve("crypto-browserify"),
+      http: false,
+      https: false,
+      buffer: require.resolve('buffer'),
+      stream: require.resolve('stream-browserify'),
+      assert: require.resolve('assert'),
+    }
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer']
+    }),
 
-//     new webpack.ProvidePlugin({
-//       process: 'process/browser'
-//     }),
-//   ],
-//   module: {
-//     rules: [
-//       {
-//         test: /\.m?js$/i,
-//         exclude: /node_modules/,
-//         type: 'javascript/auto'
-//       },
-//       {
-//         test: /\.(ts|js)x?$/i,
-//         exclude: /node_modules/,
-//         use: {
-//           loader: "babel-loader",
-//           options: {
-//             presets: [
-//               "@babel/preset-env",
-//               "@babel/preset-typescript",
-//             ],
-//           },
-//         },
-//       },
-//     ]
-//   }
-// };
+    new webpack.ProvidePlugin({
+      process: 'process/browser'
+    }),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.m?js$/i,
+        exclude: /node_modules/,
+        type: 'javascript/auto'
+      },
+      {
+        test: /\.(ts|js)x?$/i,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              "@babel/preset-env",
+              "@babel/preset-typescript",
+            ],
+          },
+        },
+      },
+      {
+        test: /\.wasm$/,
+        // type: 'webassembly/experimental',
+      },
+    ]
+  }
+};
 
-// module.exports = [config, workerConfig];
-
-module.exports = [config];
+module.exports = [config, workerConfig];
